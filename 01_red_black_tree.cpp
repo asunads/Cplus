@@ -47,11 +47,43 @@ class IPH_Redblack_node{
                 }
             }
         }
+        IPH_Redblack_node * predecessor();
+        IPH_Redblack_node * successor();
+
         bool is_leaf();
         void rotate_left();
         void rotate_right();
         IPH_Redblack_node *  find(int index);
 };
+class IPH_Redblack_tree
+{
+    public:
+        IPH_Redblack_tree():_count(0),root(INT_MAX){
+            root.count = 0;
+        }
+        IPH_Redblack_node root;
+        void Iph_insert(int key);
+
+        void Iph_insert(int key,int d);
+        void Iph_delete(int key);
+        IPH_Redblack_node * Iph_find(int index);
+        void Iph_repair(IPH_Redblack_node *p);
+        int _count ;
+};
+
+void replace_node(struct IPH_Redblack_node* n, struct IPH_Redblack_node* child);
+void Iph_delete_repair_left(IPH_Redblack_node * p,IPH_Redblack_node * root);
+void Iph_delete_repair_right(IPH_Redblack_node * p,IPH_Redblack_node * root);
+void update_count(IPH_Redblack_node *p);
+void printT(IPH_Redblack_node *n,int a);
+bool IPH_Check_color(IPH_Redblack_node &n,int a);
+int counter(IPH_Redblack_node *T);
+bool IPH_Check_count(IPH_Redblack_node * root);
+bool IPH_Check(IPH_Redblack_node *T,int count);
+void Iph_swap_content(IPH_Redblack_node *n,IPH_Redblack_node *child);
+void check_delete(IPH_Redblack_tree & T);
+
+
 void replace_node(struct IPH_Redblack_node* n, struct IPH_Redblack_node* child){
     child->parent = n->parent;
     if (n == n->parent->left)
@@ -62,7 +94,6 @@ void replace_node(struct IPH_Redblack_node* n, struct IPH_Redblack_node* child){
     child->right = n->right;
 }
 
-void Iph_delete_repair_left(IPH_Redblack_node * p,IPH_Redblack_node * root);
 void Iph_delete_repair_right(IPH_Redblack_node * p,IPH_Redblack_node * root)
 {
     IPH_Redblack_node *parent = p->parent;
@@ -179,6 +210,7 @@ void update_count(IPH_Redblack_node *p)
     p->count = re+1;
 }
 
+
 void IPH_Redblack_node::rotate_right()
 {
     if(this->left == 0)
@@ -207,6 +239,7 @@ void IPH_Redblack_node::rotate_right()
     update_count(this->parent);
 }
 
+
 void IPH_Redblack_node::rotate_left()
 {
     if(this->right == 0)
@@ -234,21 +267,7 @@ void IPH_Redblack_node::rotate_left()
     update_count(this);
     update_count(this->parent);
 }
-class IPH_Redblack_tree
-{
-    public:
-        IPH_Redblack_tree():_count(0),root(INT_MAX){
-            root.count = 0;
-        }
-        IPH_Redblack_node root;
-        void Iph_insert(int key);
 
-        void Iph_insert(int key,int d);
-        void Iph_delete(int key);
-        IPH_Redblack_node * Iph_find(int index);
-        void Iph_repair(IPH_Redblack_node *p);
-        int _count ;
-};
 
 IPH_Redblack_node * IPH_Redblack_tree::Iph_find(int index)
 {
@@ -417,7 +436,7 @@ bool IPH_Check_color(IPH_Redblack_node &n,int a)
 }
 
 
-int height = 0;
+static int height = 0;
 int counter(IPH_Redblack_node *T)
 {
     if(T!=0)
@@ -426,6 +445,7 @@ int counter(IPH_Redblack_node *T)
     }
     return 0;
 }
+
 bool IPH_Check_count(IPH_Redblack_node * root)
 {
     int re = 0;
@@ -693,6 +713,51 @@ void check_delete(IPH_Redblack_tree & T)
 
     cout<<"check"<<endl;
 }
+
+
+IPH_Redblack_node * IPH_Redblack_node::predecessor()
+{
+	IPH_Redblack_node *p = this;
+	if(p->left)
+	{
+		p = p->left;
+		while(p->right)
+			p = p->right;
+		return p;
+	}else{
+		while(p == p->parent->left)
+		{
+			p = p->parent;
+		}
+		p = p->parent;
+		if(p->parent == 0)
+			return 0;
+		return p;
+	}
+}
+IPH_Redblack_node * IPH_Redblack_node::successor()
+{
+	IPH_Redblack_node *p = this;
+	if(this->right)
+	{
+		p = this->right;
+		while(p->left)
+			p = p->left;
+		return p;
+	}else{
+		while(p == p->parent->right)
+		{
+			p = p->parent;
+		}
+		p = p->parent;
+		if(p->parent == 0)
+			return 0;
+		return p;
+	}
+}
+
+
+
 int main()
 {
     IPH_Redblack_node node(2);
@@ -723,6 +788,24 @@ int main()
     for(int i = 0;i<2048*8;i++)
     {
         IPH_Redblack_node * p  =T.Iph_find(i);
+        if(i < 2048*8 - 1)
+        {
+            int x = p->successor()->key;
+            if( x!= i+1)
+            {
+                cout<<"error successor x  = "<<x<<"i = "<<i<<endl;
+                x = p->successor()->key;
+            }
+        }
+        if(i > 0)
+        {
+            int x = p->predecessor()->key;
+            if( x!= i-1)
+            {
+                cout<<"error predecessor x  = "<<x<<"i = "<<i<<endl;
+                x = p->successor()->key;
+            }
+        }
         if(p->key != i) {
             cout<<"error find 2"<<endl;
         }
@@ -730,5 +813,3 @@ int main()
     return 0;
     
 }
-
-
